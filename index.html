@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Battle Arena</title>
+        <link rel="icon" href="favicon.ico?v=1.4">
+        <link type="text/css" rel="stylesheet" href="css/screen.css">
+    </head>
+    <body>
+
+    <section id="sokemon1" class="zone"></section>
+    <section id="sokemon2" class="zone"></section>
+
+    <section id="chat"><ul id="messages"></ul></section>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+    // Client-side
+    var socket = io();
+
+    var messages = document.getElementById('messages');
+
+    // form.addEventListener('submit', function(e) {
+    //     e.preventDefault();
+    //     if (input.value) {
+    //         socket.emit('chat message', input.value);
+    //         input.value = '';
+    //     }
+    // });
+
+    socket.on('chat message', function(msg) {
+        var item = document.createElement('li');
+        item.textContent = msg;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    socket.on('join battle', function(sokemon) {
+        var item = document.createElement('li');
+        item.textContent = sokemon.name[0] + ' wants to join a battle';
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+    </script>
+  </body>
+</html>
