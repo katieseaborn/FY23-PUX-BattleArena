@@ -4,42 +4,372 @@
         <title>Battle Arena</title>
         <link rel="icon" href="favicon.ico?v=1.4">
         <link type="text/css" rel="stylesheet" href="css/screen.css">
+        <script type="application/javascript" src="js/anime.min.js"></script>
     </head>
     <body>
 
-    <section id="sokemon1" class="zone"></section>
-    <section id="sokemon2" class="zone"></section>
+    <section id="battle-feed">
+        <span id="battle-msg">Battle Message</span>
+        <!-- <div id="battle-effect">
+            <div id="battle-effect-star"></div>
+            <div id="battle-effect-stars"></div>
+        </div> -->
+    </section>
 
-    <section id="chat"><ul id="messages"></ul></section>
+    <section id="battle-zone">
 
+        <section id="contender1" class="zone"></section>
+        <section id="contender2" class="zone"></section>
+
+        <section id="chat"><ul id="messages"></ul></section>
+
+    </section>
+
+    <section id="music">
+        <button id="music-control" class="off">🎵</button>
+
+        <audio id="audio-music" autoplay loop>
+            <source src="music/104 - Now for the Adventure!.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </section>
+
+    <!-- JavaScripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
+
     // Client-side
     var socket = io();
 
-    var messages = document.getElementById('messages');
+    //////////////////////////
+    // Variables
 
-    // form.addEventListener('submit', function(e) {
-    //     e.preventDefault();
-    //     if (input.value) {
-    //         socket.emit('chat message', input.value);
-    //         input.value = '';
-    //     }
-    // });
+    var music_ctrl = document.getElementById('music-control');
+    var music = document.getElementById('audio-music');
+    var messages = document.getElementById('messages');
+    var zone1 = document.getElementById('contender1');
+    var zone2 = document.getElementById('contender2');
+    var battle_feed = document.getElementById('battle-feed');
+    var battle_msg = document.getElementById('battle-msg');
+    // var battle_effect = document.getElementById('battle-effect');
+
+    var battle_music = [
+        'music/107 - Battle! Cheren & Belle.mp3',
+        'music/114 - Battle! Wild Pokémon.mp3',
+        'music/126 - Battle! Trainer.mp3',
+        'music/134 - Battle! Team Plasma.mp3',
+        'music/236b - Battle! Zekrom.mp3',
+        'music/237 - Decisive Battle! N.mp3',
+        'music/329b - Battle! Roaming Pokémon.mp3',
+        'music/350 - Battle! Cynthia.mp3',
+        'music/352 - Battle! Strong Wild Pokémon.mp3',
+        'music/409 - Team Rocket!.mp3',
+        'music/410 - Battle! Kyurem.mp3',
+        'music/412 - Battle! Champion.mp3'
+    ];
+
+    // Let's set up the voice
+    // And get all the possible voices
+    const synth = window.speechSynthesis;
+    const voices = synth.getVoices();
+
+
+    // Scroll down log
+    messages.scrollTop = messages.scrollHeight;
+
+    //////////////////////////
+    // Sound Control
+
+    // Set bgm to half volume
+    music.volume = 0.5;
+
+    // Set up music button animation
+    var music_anim = anime({
+        targets: music_ctrl,
+        autoplay: false,
+        loop: true,
+        direction: 'alternate',
+        duration: 500, //ms
+        easing: 'easeInOutCirc',
+        rotate: '+=10', //deg
+        loopComplete: function (anim) {}
+    });
+
+    // We need to wait for the DOM to load
+    window.onload = function() {
+
+        music_ctrl.addEventListener('click', function(e)
+        {
+            // Turn on/off music
+            if ( music_ctrl.classList.contains('on') ) {
+                music.pause();
+            } else {
+                music.play();
+                music_anim.play();
+            }
+
+            // Toggle button visuals
+            music_ctrl.classList.toggle('on');
+        });
+
+    }; // window.onload
+
+    //////////////////////////
+    // Chat Messages
+
+    socket.on('get chat cache', function(log_cache) {
+
+        if ( log_cache )
+        {
+            for (const msg of log_cache) {
+                var log_msg = document.createElement('li');
+                log_msg.textContent = msg;
+                messages.appendChild(log_msg);
+            }
+
+            // Scroll down log
+            messages.scrollTop = messages.scrollHeight;
+        }
+    });
 
     socket.on('chat message', function(msg) {
         var item = document.createElement('li');
         item.textContent = msg;
         messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
+
+        // Scroll down log
+        messages.scrollTop = messages.scrollHeight;
     });
 
     socket.on('join battle', function(sokemon) {
         var item = document.createElement('li');
         item.textContent = sokemon.name[0] + ' wants to join a battle';
         messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
+
+        // Scroll down log
+        messages.scrollTop = messages.scrollHeight;
     });
+
+
+    //////////////////////////
+    // Battle
+
+    // New contender joins the battle
+    socket.on('new contender', function(contender) {
+        console.log('New contender: '+contender.name);
+        // ip, port, name, sokemon
+
+        // Determine open zone
+        var contender_zone = zone1;
+        if ( zone2.childNodes.length === 0 )
+            contender_zone = zone2;
+
+        // Create iframe
+        var iframe = document.createElement('iframe');
+        iframe.setAttribute('src', 'http://'+contender.ip+':'+contender.port+'/sokemon');
+        iframe.setAttribute('allowtransparency', 'true');
+        iframe.setAttribute('id', 'con-'+contender.name);
+        contender_zone.appendChild(iframe);
+
+        // Create sokemon status panel
+        var spanel = document.createElement('div');
+        spanel.setAttribute('id', 'spanel-'+contender.name);
+        spanel.setAttribute('class', 'spanel');
+
+        // Name
+        var spanel_name = document.createElement('span');
+        spanel_name.setAttribute('class', 'name');
+        spanel_name.textContent = contender.name +' ・ '+contender.sokemon.name[1];
+        spanel.appendChild(spanel_name);
+
+        // HP
+        var spanel_hp = document.createElement('div');
+        spanel_hp.setAttribute('class', 'hp');
+        spanel_hp.setAttribute('data-hp', contender.sokemon.currentHP);
+        var spanel_hp_total = document.createElement('div');
+        spanel_hp_total.setAttribute('class', 'total');
+        spanel_hp_total.setAttribute('data-hp', contender.sokemon.currentHP);
+        spanel_hp.appendChild(spanel_hp_total);
+        spanel.appendChild(spanel_hp);
+
+        // Add it
+        contender_zone.appendChild(spanel);
+
+        // Fade in sokemon
+        anime({
+            targets: '#con-'+contender.name,
+            opacity: 1.0,
+            easing: 'easeInOutQuad',
+            duration: 500,
+            complete: function(anim) {
+                // Swing in sokemon status panel
+                anime({
+                    targets: '#spanel-'+contender.name,
+                    right: 0,
+                    opacity: 1.0,
+                    easing: 'easeInOutQuad',
+                    duration: 300
+                });
+            }
+        });
+
+        // Cry!!
+        sokecry(contender.sokemon);
+    });
+
+    // Contender is removed from battle
+    socket.on('remove contender', function(contender) {
+        console.log('Remove contender: '+contender.name);
+        // ip, port, name, sokemon
+
+        // Cry!!
+        sokecry(contender.sokemon);
+
+        // Remove the sokemon, if it's there
+        if ( document.getElementById('con-'+contender.name) )
+        {
+            var con_el = document.getElementById('con-'+contender.name);
+            var con_el_parent = con_el.parentElement;
+
+            // Swing out sokemon status panel
+            // Fade out sokemon
+            anime({
+                targets: con_el,
+                opacity: 0,
+                easing: 'easeInOutQuad',
+                complete: function(anim) {
+                    anime({
+                        targets: '#spanel-'+contender.name,
+                        right: '-5vw',
+                        opacity: 0,
+                        easing: 'easeInOutQuad',
+                        duration: 300,
+                        complete: function(anim) {
+                            // Remove all traces !!!
+                            while ( con_el_parent.firstChild ) {
+                                con_el_parent.removeChild( con_el_parent.firstChild );
+                            }
+                        }
+                    });
+                }
+            });
+        } // check
+    });
+
+    // Start battle
+    socket.on('start battle', function(battle) {
+        console.log('Let\'s start the battle!');
+        // battle: state, players (contender), turn (pid, name)
+        // contender: ip, port, name, sokemon
+
+        // TODO: Start random battle music
+
+        // Show start message
+        battle_msg.textContent = 'Start!';
+
+        anime({
+            delay: 1000,
+            targets: battle_msg,
+            opacity: 1.0,
+            marginTop: '-=2vw',
+            easing: 'easeInOutQuad',
+            complete: function(anim) {
+
+                anime({
+                    targets: battle_msg,
+                    opacity: 0,
+                    marginTop: '+=2vw',
+                    easing: 'easeInOutQuad'
+                });
+
+                // Let server know it's on
+                socket.emit('battle ready', 'ready');
+            }
+        });
+    });
+
+    socket.on('whose turn?', function(battle) {
+        console.log('whose turn?', battle);
+        // battle: state, players (contender), turn (pid, name)
+        // contender: ip, port, name, sokemon
+
+        var player = battle.players[battle.turn.pid];
+
+        var otherPlayer = battle.players[0];
+        if ( battle.turn.pid === 0 )
+            otherPlayer = battle.players[1];
+
+        // Unhighlight previous
+        document.getElementById('spanel-'+otherPlayer.name).classList.remove('active');
+
+        // Highlight the sokemon status panel
+        document.getElementById('spanel-'+player.name).classList.add('active');
+    });
+
+    socket.on('hit', function(hit) {
+        console.log('HIT!!', hit);
+        // otherPlayer, currentHP, totalHP
+
+        // The contender is the other sokemon who gets hit!!
+        var otherPanel = document.getElementById('spanel-'+hit.otherPlayer.name);
+        var conHP = otherPanel.querySelector('.hp .total');
+
+        var ratioHP = hit.currentHP / hit.totalHP;
+        var wHP = conHP.offsetWidth * ratioHP;
+        conHP.setAttribute('style', 'width: '+wHP+'px');
+        console.log(hit.otherPlayer.name+' gets hit! HP -> '+hit.currentHP+'/'+hit.totalHP);
+
+        // TODO: Animate?
+    });
+
+    socket.on('winner', function(player) {
+        console.log('WINNER: '+ player.name);
+
+        // Show winner message
+        battle_msg.textContent = 'Winner!';
+
+        anime({
+            delay: 1000,
+            targets: battle_msg,
+            opacity: 1.0,
+            marginTop: '-=2vw',
+            easing: 'easeInOutQuad',
+            complete: function(anim) {
+
+                anime({
+                    targets: battle_msg,
+                    opacity: 0,
+                    marginTop: '+=2vw',
+                    easing: 'easeInOutQuad'
+                });
+
+                // Let server know it's on?
+                // TODO: Hearts animation?
+            }
+        });
+    });
+
+    // Just in case, I'll handle the voice
+    let sokecry = function (sokemon)
+    {
+        const utterThis = new SpeechSynthesisUtterance( sokemon.voice.cry );
+
+        // Set the voice
+        for (const synthVoice of voices) {
+            if (synthVoice.name === sokemon.voice.name) {
+                utterThis.voice = synthVoice;
+            }
+        }
+
+        // Set the voice properties
+        utterThis.pitch = sokemon.voice.pitch;
+        utterThis.rate = sokemon.voice.rate;
+        utterThis.volume = 1;
+
+        // Then speak
+        synth.speak( utterThis );
+    };
+
     </script>
   </body>
 </html>
