@@ -4,10 +4,15 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-// const io = new Server(server);
+const ip = require('ip');
 const io = require("socket.io")(server, {
     cors: {
-        origin: ["http://localhost:3001", "http://localhost:3002"], // Sokémon are on this port
+        origin: [
+            "http://localhost:3001",
+            "http://localhost:3002",
+            "http://"+ip.address()+":3001",
+            "http://"+ip.address()+":3002"
+        ], // Sokémon are on these ports
         methods: ["GET", "POST"]
     }
 });
@@ -81,6 +86,8 @@ io.on('connection', (socket) => {
         battle.players = [];
         battle.turn.pid = 0;
         battle.turn.name = '';
+
+        console.log('battle:', battle);
     }
 
     // Join battle
@@ -192,120 +199,128 @@ io.on('connection', (socket) => {
         console.log(player.name+' wants to attack!');
         // ip, port, name, sokemon
 
-        var activePlayer = battle.players[battle.turn.pid];
-
-        // Warning! Only let the current player attack
-        if ( player.name == activePlayer.name )
+        // Can only attack if the game has started
+        if ( battle.state == 'active' )
         {
-            // Let's pause so animations can run
-            setTimeout(() => {  console.log("Wait over!"); }, 3000);
+            var activePlayer = battle.players[battle.turn.pid];
 
-            console.log('- Attacker is '+activePlayer.name);
+            // Warning! Only let the current player attack
+            if ( player.name == activePlayer.name )
+            {
+                // Let's pause so animations can run
+                setTimeout(() => {  console.log("Wait over!"); }, 3000);
 
-            var otherPlayer = battle.players[0];
-            if ( battle.turn.pid === 0 )
-                otherPlayer = battle.players[1];
+                console.log('- Attacker is '+activePlayer.name);
 
-            console.log('- Target is '+otherPlayer.name);
+                var otherPlayer = battle.players[0];
+                if ( battle.turn.pid === 0 )
+                    otherPlayer = battle.players[1];
 
-            // // Check if other player is dodging
-            // // TODO: doding
-            // if ( otherPlayer.dodging == true )
-            // {
-            //     // MISSSSS
-            //     // TODO: Miss message?
-            //     otherContender.dodging = false;
-            //
-            //     // Next player
-            //     if ( battle.turn.contender === 2 )
-            //         battle.turn.contender = 1;
-            //     else
-            //         battle.turn.contender = 2;
-            //
-            //     io.emit('whose turn?', battle);
-            // }
-            // else // ATTACK!!!
-            // {
-                var otherCurrentHP = otherPlayer.sokemon.currentHP;
-                var otherHP = otherPlayer.sokemon.attributes.HP;
+                console.log('- Target is '+otherPlayer.name);
 
-                var activeConAtk = activePlayer.sokemon.attributes.Attack;
-                // TODO: Add random super effective
-                activeConAtk = activeConAtk / 5; // rough
+                // // Check if other player is dodging
+                // // TODO: doding
+                // if ( otherPlayer.dodging == true )
+                // {
+                //     // MISSSSS
+                //     // TODO: Miss message?
+                //     otherContender.dodging = false;
+                //
+                //     // Next player
+                //     if ( battle.turn.contender === 2 )
+                //         battle.turn.contender = 1;
+                //     else
+                //         battle.turn.contender = 2;
+                //
+                //     io.emit('whose turn?', battle);
+                // }
+                // else // ATTACK!!!
+                // {
+                    var otherCurrentHP = otherPlayer.sokemon.currentHP;
+                    var otherHP = otherPlayer.sokemon.attributes.HP;
 
-                // Calculate damage
-                otherCurrentHP = otherCurrentHP - activeConAtk;
-                if ( otherCurrentHP < 0 ) otherCurrentHP = 0;
+                    var activeConAtk = activePlayer.sokemon.attributes.Attack;
+                    // TODO: Add random super effective
+                    activeConAtk = activeConAtk / 5; // rough
 
-                // Update otherCurrentHPs
-                otherPlayer.sokemon.currentHP = otherCurrentHP;
+                    // Calculate damage
+                    otherCurrentHP = otherCurrentHP - activeConAtk;
+                    if ( otherCurrentHP < 0 ) otherCurrentHP = 0;
 
-                // ATTACKK!!!
-                io.emit('hit', {
-                    otherPlayer: otherPlayer,
-                    currentHP: otherCurrentHP,
-                    totalHP: otherHP
-                });
+                    // Update otherCurrentHPs
+                    otherPlayer.sokemon.currentHP = otherCurrentHP;
 
-                if ( otherCurrentHP === 0 )
-                {
-                    // FAINTED
-                    // Reset state
-                    battle.state = 'waiting';
+                    // ATTACKK!!!
+                    io.emit('hit', {
+                        otherPlayer: otherPlayer,
+                        currentHP: otherCurrentHP,
+                        totalHP: otherHP
+                    });
 
-                    // Send winner message
-                    setTimeout(() => {
-                        io.emit('winner', activePlayer);
-                    }, 3000 );
+                    if ( otherCurrentHP === 0 )
+                    {
+                        // FAINTED
+                        // Reset state
+                        battle.state = 'waiting';
 
-                    // Remove the player
-                    if ( battle.players[0].name == otherPlayer.name )
-                        battle.players.splice(0, 1);
-                    else if ( battle.players[1].name == otherPlayer.name )
-                        battle.players.splice(1, 1);
+                        // Send winner message
+                        setTimeout(() => {
+                            io.emit('winner', activePlayer);
+                        }, 3000 );
 
-                    // Announce
-                    var msg = 'Player '+otherPlayer.name+' has left the battle!';
-                    io.emit('chat message', msg);
-                    io.emit('remove contender', otherPlayer);
-                    cache.messages.push(msg);
-                }
-                else // continue
-                {
-                    // Next player
-                    if ( battle.turn.pid === 1 )
-                        battle.turn.pid = 0;
-                    else
-                        battle.turn.pid = 1;
+                        // Remove the player
+                        if ( battle.players[0].name == otherPlayer.name )
+                            battle.players.splice(0, 1);
+                        else if ( battle.players[1].name == otherPlayer.name )
+                            battle.players.splice(1, 1);
 
-                    setTimeout(() => {
-                        io.emit('whose turn?', battle);
-                    }, 3000 );
-                }
-            // }
-        } // check if their turn
+                        // Announce
+                        var msg = 'Player '+otherPlayer.name+' has left the battle!';
+                        io.emit('chat message', msg);
+                        io.emit('remove contender', otherPlayer);
+                        cache.messages.push(msg);
+                    }
+                    else // continue
+                    {
+                        // Next player
+                        if ( battle.turn.pid === 1 )
+                            battle.turn.pid = 0;
+                        else
+                            battle.turn.pid = 1;
+
+                        setTimeout(() => {
+                            io.emit('whose turn?', battle);
+                        }, 3000 );
+                    }
+                // }
+            } // check if their turn
+        } // check if battle active
     });
 
     // TODO: battle action: dodge
     socket.on('battle action: dodge', (contender) => {
         console.log('Contender wants to dodge: ' + contender.sokemon.name[0]);
 
-        var activeContender = battle.contenders['contender'+battle.turn.contender];
-
-        // Check if it's their turn
-        if ( activeContender.name == contender.sokemon.name[0] )
+        // Can only dodge if the game has started
+        if ( battle.state == 'active' )
         {
-            // Set the dodging
-            activeContender.dodging = true;
+            var activeContender = battle.contenders['contender'+battle.turn.contender];
 
-            // Next player
-            if ( battle.turn.contender === 2 )
-                battle.turn.contender = 2;
-            else
-                battle.turn.contender = 1;
+            // Check if it's their turn
+            if ( activeContender.name == contender.sokemon.name[0] )
+            {
+                // Set the dodging
+                activeContender.dodging = true;
 
-            io.emit('whose turn?', battle);
-        }
+                // Next player
+                if ( battle.turn.contender === 2 )
+                    battle.turn.contender = 2;
+                else
+                    battle.turn.contender = 1;
+
+                io.emit('whose turn?', battle);
+            }
+        } // check if game started
     });
 
   // socket.broadcast.emit('hi');

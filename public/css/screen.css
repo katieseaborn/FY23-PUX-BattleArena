@@ -90,29 +90,74 @@ button#music-control:active {
     z-index: 10;
     position: absolute;
     top: 0;
-    left: calc((100vw / 2) - 10vw - 10vw);
-    display: flex;
+    left: calc((100vw / 2) - 15vw - 10vw);
+    /* display: flex;
     align-items: center;
-    justify-content: center;
-    /* display: none; */
-    width: 20vw;
+    justify-content: center; */
+    width: 30vw;
     height: 100%;
 }
 #battle-msg {
+    z-index: 0;
+    position: relative;
+    top: calc(100vh / 3);
+    left: 0;
     opacity: 0;
     background: -webkit-linear-gradient(#C2185B, #18FFFF);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    display: block;
     font-family: 'Pokemon Solid', Helvetica, sans-serif;
-    font-size: 6rem;
+    font-size: 4rem;
     font-weight: 900;
     filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
-    -webkit-text-stroke: 0.15rem #fff;
-    padding: 0 0.4rem;
+    -webkit-text-stroke: 0.1rem #fff;
+    padding: 0;
     text-transform: uppercase;
     text-align: center;
+    width: 100%;
 }
-#battle-msg.winner {
+#battle-msg.winner {}
+#battle-effect {
+    z-index: 1;
+    position: relative;
+    width: 100%;
+    height: auto;
+}
+#battle-effect-attack {
+    position: relative;
+    opacity: 0;
+    width: 100%;
+    height: 30vh;
+}
+#battle-effect-attack.on {
+    opacity: 1.0;
+}
+/* Thanks to https://codepen.io/jpbarth/pen/VyyegV */
+#battle-effect-attack .burst {
+    position: absolute;
+    top: 5vw;
+    left: 5vw;
+    border-radius: 50%;
+    box-shadow:
+        inset 0 0 50px #fff,
+        inset 20px 0 60px #fff,
+        inset -20px 0 60px #fff,
+        inset 20px 0 300px #fff,
+        inset -20px 0 300px #fff,
+          0 0 50px #F4FF81,
+          -10px 0 60px #F4FF81,
+          10px 0 60px #F4FF81;
+    width: 10vh;
+    height: 10vh;
+}
+#battle-effect-attack .burst:nth-of-type(1) {
+    top: 8vw;
+    left: 20vw;
+}
+#battle-effect-attack .burst:nth-of-type(2) {
+    top: 3vw;
+    left: 15vw;
 }
 
 .zone {

@@ -9,11 +9,19 @@
     <body>
 
     <section id="battle-feed">
-        <span id="battle-msg">Battle Message</span>
-        <!-- <div id="battle-effect">
-            <div id="battle-effect-star"></div>
-            <div id="battle-effect-stars"></div>
-        </div> -->
+        <div id="battle-msg">Battle Message</div>
+        <div id="battle-effect">
+            <div id="battle-effect-attack">
+                <div class="burst"></div>
+                <div class="burst"></div>
+                <div class="burst"></div>
+            </div>
+            <div id="battle-effect-win">
+                <div class="heart"></div>
+                <div class="heart"></div>
+                <div class="heart"></div>
+            </div>
+        </div>
     </section>
 
     <section id="battle-zone">
@@ -29,7 +37,7 @@
         <button id="music-control" class="off">🎵</button>
 
         <audio id="audio-music" autoplay loop>
-            <source src="music/104 - Now for the Adventure!.mp3" type="audio/mpeg">
+            <source id="audio-music-source" src="music/104 - Now for the Adventure!.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
     </section>
@@ -46,12 +54,16 @@
 
     var music_ctrl = document.getElementById('music-control');
     var music = document.getElementById('audio-music');
+    var music_src = document.getElementById('audio-music-source');
+    var music_src_default = 'music/104 - Now for the Adventure!.mp3';
     var messages = document.getElementById('messages');
     var zone1 = document.getElementById('contender1');
     var zone2 = document.getElementById('contender2');
     var battle_feed = document.getElementById('battle-feed');
     var battle_msg = document.getElementById('battle-msg');
-    // var battle_effect = document.getElementById('battle-effect');
+    var battle_effect = document.getElementById('battle-effect');
+    var battle_ef_atk = document.getElementById('battle-effect-attack');
+    var battle_ef_win = document.getElementById('battle-effect-win');
 
     var battle_music = [
         'music/107 - Battle! Cheren & Belle.mp3',
@@ -68,11 +80,19 @@
         'music/412 - Battle! Champion.mp3'
     ];
 
+    // Thanks to @jimmymeego: https://stackoverflow.com/questions/37762056/fade-out-of-a-mp3-song-using-javascript
+    function audio_fade() {
+        // var myAudio = document.getElementById("myAudio");
+        if ( music.volume > 0 ) {
+            music.volume -= .2;
+            timer = setTimeout(aud_fade, 200);
+        }
+    }
+
     // Let's set up the voice
     // And get all the possible voices
     const synth = window.speechSynthesis;
     const voices = synth.getVoices();
-
 
     // Scroll down log
     messages.scrollTop = messages.scrollHeight;
@@ -304,7 +324,10 @@
         // battle: state, players (contender), turn (pid, name)
         // contender: ip, port, name, sokemon
 
-        // TODO: Start random battle music
+        // Start random battle music
+        music.volume = 0.8;
+        music_src.src = battle_music[Math.floor(Math.random()*battle_music.length)];
+        music.load();
 
         // Show start message
         battle_msg.textContent = 'Start!';
@@ -318,20 +341,22 @@
             complete: function(anim) {
 
                 anime({
+                    delay: 1000,
                     targets: battle_msg,
                     opacity: 0,
                     marginTop: '+=2vw',
-                    easing: 'easeInOutQuad'
-                });
+                    easing: 'easeInOutQuad',
+                    complete: function(anim) {
 
-                // Let server know it's on
-                socket.emit('battle ready', 'ready');
+                        // Let server know it's on
+                        socket.emit('battle ready', 'ready');
+                    }
+                });
             }
         });
     });
 
     // Determine who's turn it is
-
     socket.on('whose turn?', function(battle) {
         console.log('whose turn?', battle);
         // battle: state, players (contender), turn (pid, name)
@@ -347,13 +372,14 @@
         if ( battle.turn.pid === 0 )
             otherPlayer = battle.players[1];
 
-        // Unhighlight previous
-        document.getElementById('spanel-'+otherPlayer.name).classList.remove('active');
+        // Unhighlight previous, if exists ???
+        if ( typeof otherPlayer != 'undefined' )
+            document.getElementById('spanel-'+otherPlayer.name).classList.remove('active');
 
         // Highlight the sokemon status panel
         document.getElementById('spanel-'+player.name).classList.add('active');
 
-        // Set up animations
+        // Set up status panel animations
         activePlayerAnim = anime({
             autoplay: false,
             targets: '.spanel.active',
@@ -368,6 +394,7 @@
         activePlayerAnim.play();
     });
 
+    // Attack!!! And get hit
     socket.on('hit', function(hit) {
         console.log('HIT!!', hit);
         // otherPlayer, currentHP, totalHP
@@ -385,27 +412,62 @@
         if ( typeof activePlayerAnim != 'undefined' )
             activePlayerAnim.pause();
 
-        // TODO: Attack sound
-        // TODO: Animate attack
-        // TODO: Animate HP decrease
-        anime({
-            targets: conHP,
-            delay: 1000,
-            opacity: 1.0,
-            width: wHP+'px',
-            easing: 'easeInOutQuad',
-            complete: function(anim) {
+        // TODO: Attack animation?
 
-                // console.log('Let\'s wait!');
-                //
-                // // Ask server to wait, in ms
-                // socket.emit('please wait', 2000);
+        // Shake the other player's panel
+        anime({
+            targets: otherPanel,
+            scale: function(el, i, l) {
+                return (l - i) + .1;
+            },
+            direction: 'alternate',
+            easing: 'easeInOutQuad',
+            loop: 6,
+            duration: 70
+        });
+
+        // Hit sound
+        sokecry(hit.otherPlayer.sokemon, 'いーたーいーいー');
+
+        // Animate getting hit
+        // Show the effect
+        battle_ef_atk.classList.toggle('on');
+
+        anime({
+            targets: '#'+battle_ef_atk.id+' .burst',
+            loop: 5,
+            duration: 50,
+            delay: anime.stagger(50),
+            scale: [.5,1.5],
+            opacity: [.5, 1.0],
+            easing: 'easeInOutQuad',
+            direction: 'alternate',
+            complete: function (anim) {
+
+                battle_ef_atk.classList.toggle('on');
+
+                // Animate HP decrease
+                anime({
+                    targets: conHP,
+                    delay: 500,
+                    opacity: 1.0,
+                    width: wHP+'px',
+                    easing: 'easeInOutQuad',
+                    complete: function(anim) {}
+                });
             }
         });
     });
 
     socket.on('winner', function(player) {
         console.log('WINNER: '+ player.name);
+
+        // Fade out and pause battle music
+        audio_fade();
+        music.pause();
+
+        // Winner cry
+        sokecry(player.sokemon, 'やったー！');
 
         // Show winner message
         battle_msg.textContent = 'Winner!';
@@ -428,14 +490,21 @@
 
                 // Let server know it's on?
                 // TODO: Hearts animation?
+                music_src.src = music_src_default;
+                music.load();
+                music.volume = 0.8;
+                music.play();
             }
         });
     });
 
     // Just in case, I'll handle the voice
-    let sokecry = function (sokemon)
+    let sokecry = function (sokemon, speech='')
     {
-        const utterThis = new SpeechSynthesisUtterance( sokemon.voice.cry );
+        if ( speech == '' )
+            speech = sokemon.voice.cry;
+
+        const utterThis = new SpeechSynthesisUtterance( speech );
 
         // Set the voice
         for (const synthVoice of voices) {
