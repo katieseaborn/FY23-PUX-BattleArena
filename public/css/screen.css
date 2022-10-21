@@ -100,13 +100,19 @@ button#music-control:active {
 }
 #battle-msg {
     opacity: 0;
-    font-size: 4rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    text-align: center;
     background: -webkit-linear-gradient(#C2185B, #18FFFF);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    font-family: 'Pokemon Solid', Helvetica, sans-serif;
+    font-size: 6rem;
+    font-weight: 900;
+    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+    -webkit-text-stroke: 0.15rem #fff;
+    padding: 0 0.4rem;
+    text-transform: uppercase;
+    text-align: center;
+}
+#battle-msg.winner {
 }
 
 .zone {
@@ -161,6 +167,9 @@ iframe {
     width: calc(100% - 4vw);
     min-height: 100%;
 }
+.left iframe {
+    transform: scaleX(-1); /* flips horizontally */
+}
 
 .spanel {
     position: absolute;
@@ -173,6 +182,10 @@ iframe {
     margin: 1vw;
     padding: 1vw;
     width: 60%;
+}
+.left .spanel {
+    right: auto;
+    left: -5vw;
 }
 .spanel.active {
     border-color: #00E676;

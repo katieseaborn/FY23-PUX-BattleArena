@@ -38,18 +38,6 @@ const cache = {
 // Battle
 let battle = {
     state: 'waiting', // waiting, start, active
-    // contenders: {
-    //     contender1: {
-    //         name: '',
-    //         contender: {},
-    //         dodging: false
-    //     },
-    //     contender2: {
-    //         name: '',
-    //         contender: {},
-    //         dodging: false
-    //     }
-    // },
     players: [],
     turn: {
         pid: 0,
@@ -62,15 +50,17 @@ io.on('connection', (socket) => {
     //////////////////////////////
     // User Management
 
+    var userPort = socket.handshake.headers.host.split(':')[1];
+
     // Listen for users logging on
-    console.log('a user connected');
+    console.log('a user connected', userPort);
 
     // Send the cached messages
     io.emit('get chat cache', cache.messages);
 
     // Listen for users disconnecting
     socket.on('disconnect', () => {
-        console.log('user disconnected');
+        console.log('user disconnected', userPort);
     });
 
     // Chat messages
@@ -83,6 +73,15 @@ io.on('connection', (socket) => {
 
     //////////////////////////////
     // Battle Management
+
+    // Flush battle if arena refreshed
+    if ( userPort == '9999')
+    {
+        battle.state = 'waiting';
+        battle.players = [];
+        battle.turn.pid = 0;
+        battle.turn.name = '';
+    }
 
     // Join battle
     socket.on('join battle', (contender) => {
@@ -180,6 +179,14 @@ io.on('connection', (socket) => {
 
     // BATTLE ACTIONS
 
+    // // Please wait!!
+    // socket.on('please wait', (ms) => {
+    //     console.log('Please wait '+ms+'ms');
+    //
+    //     setTimeout(() => {  console.log("Wait over!"); }, ms);
+    //
+    // });
+
     // battle action: attack
     socket.on('battle action: attack', (player) => {
         console.log(player.name+' wants to attack!');
@@ -190,6 +197,9 @@ io.on('connection', (socket) => {
         // Warning! Only let the current player attack
         if ( player.name == activePlayer.name )
         {
+            // Let's pause so animations can run
+            setTimeout(() => {  console.log("Wait over!"); }, 3000);
+
             console.log('- Attacker is '+activePlayer.name);
 
             var otherPlayer = battle.players[0];
@@ -244,7 +254,9 @@ io.on('connection', (socket) => {
                     battle.state = 'waiting';
 
                     // Send winner message
-                    io.emit('winner', activePlayer);
+                    setTimeout(() => {
+                        io.emit('winner', activePlayer);
+                    }, 3000 );
 
                     // Remove the player
                     if ( battle.players[0].name == otherPlayer.name )
@@ -266,7 +278,9 @@ io.on('connection', (socket) => {
                     else
                         battle.turn.pid = 1;
 
-                    io.emit('whose turn?', battle);
+                    setTimeout(() => {
+                        io.emit('whose turn?', battle);
+                    }, 3000 );
                 }
             // }
         } // check if their turn
