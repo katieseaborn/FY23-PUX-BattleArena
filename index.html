@@ -26,8 +26,12 @@
 
     <section id="battle-zone">
 
-        <section id="contender1" class="zone left"></section>
-        <section id="contender2" class="zone"></section>
+        <section id="conteder1-zone" class="zone">
+            <section id="contender1" class="contender left"></section>
+        </section>
+        <section id="conteder2-zone" class="zone">
+            <section id="contender2" class="contender"></section>
+        </section>
 
         <section id="chat"><ul id="messages"></ul></section>
 
@@ -80,12 +84,17 @@
         'music/412 - Battle! Champion.mp3'
     ];
 
-    // Thanks to @jimmymeego: https://stackoverflow.com/questions/37762056/fade-out-of-a-mp3-song-using-javascript
     function audio_fade() {
-        // var myAudio = document.getElementById("myAudio");
+        // Thanks to @jimmymeego: https://stackoverflow.com/questions/37762056/fade-out-of-a-mp3-song-using-javascript
+        // Made some mods though ......
         if ( music.volume > 0 ) {
-            music.volume -= .2;
-            timer = setTimeout(aud_fade, 200);
+            var toVol = music.volume -.2;
+
+            if ( toVol < 0 )
+                toVol = 0;
+
+            music.volume = toVol;
+            timer = setTimeout(audio_fade, 200);
         }
     }
 
@@ -97,11 +106,12 @@
     // Scroll down log
     messages.scrollTop = messages.scrollHeight;
 
+
     //////////////////////////
     // Sound Control
 
     // Set bgm to half volume
-    music.volume = 0.5;
+    music.volume = 0.6;
 
     // Set up music button animation
     var music_anim = anime({
@@ -133,6 +143,7 @@
         });
 
     }; // window.onload
+
 
     //////////////////////////
     // Chat Messages
@@ -175,7 +186,7 @@
     // Battle
 
     // New contender joins the battle
-    var activePlayerAnim;
+    var activePlayerAnim, activePlayerFrameAnim;
 
     socket.on('new contender', function(contender) {
         console.log('New contender: '+contender.name);
@@ -185,6 +196,13 @@
         var contender_zone = zone1;
         if ( zone2.childNodes.length === 0 )
             contender_zone = zone2;
+
+        // Randomly apply alt classes ... fade in?
+        var randomZone = Math.floor(Math.random()*3);
+
+        if ( randomZone == 0 )
+            contender_zone.parentElement.classList.remove('alt1', 'alt2', 'alt3');
+        contender_zone.parentElement.classList.add('alt'+randomZone);
 
         // Create iframe
         var iframe = document.createElement('iframe');
@@ -324,10 +342,19 @@
         // battle: state, players (contender), turn (pid, name)
         // contender: ip, port, name, sokemon
 
+        // Fade out and pause waiting music
+        audio_fade();
+        music.pause();
+
         // Start random battle music
-        music.volume = 0.8;
-        music_src.src = battle_music[Math.floor(Math.random()*battle_music.length)];
-        music.load();
+        setTimeout(function()
+        {
+            music.volume = 0.8;
+            music_src.src = battle_music[Math.floor(Math.random()*battle_music.length)];
+            music.load();
+            music.play();
+
+        }, 800);
 
         // Show start message
         battle_msg.textContent = 'Start!';
@@ -374,10 +401,29 @@
 
         // Unhighlight previous, if exists ???
         if ( typeof otherPlayer != 'undefined' )
+        {
+            document.getElementById('con-'+otherPlayer.name).classList.remove('active');
             document.getElementById('spanel-'+otherPlayer.name).classList.remove('active');
+        }
 
         // Highlight the sokemon status panel
-        document.getElementById('spanel-'+player.name).classList.add('active');
+        if ( typeof player != 'undefined' )
+        {
+            document.getElementById('con-'+player.name).classList.add('active');
+            document.getElementById('spanel-'+player.name).classList.add('active');
+        }
+
+        // Set up frame anime
+        activePlayerFrameAnim = anime({
+            autoplay: false,
+            targets: 'iframe.active',
+            borderColor: ['rgb(255, 128, 171)','rgb(234, 128, 252)', 'rgb(179, 136, 255)', 'rgb(132, 255, 255)', 'rgb(244, 255, 129)', 'rgb(255, 255, 255)'],
+            direction: 'alternate',
+            easing: 'easeInOutQuad',
+            loop: true,
+            duration: 1000
+        });
+        activePlayerFrameAnim.play();
 
         // Set up status panel animations
         activePlayerAnim = anime({
@@ -394,6 +440,45 @@
         activePlayerAnim.play();
     });
 
+    // MISSSSSS
+    socket.on('miss', function(battle) {
+        console.log('MISSS!!', battle);
+
+        var player = battle.players[battle.turn.pid];
+
+        var otherPlayer = battle.players[0];
+        if ( battle.turn.pid === 0 )
+            otherPlayer = battle.players[1];
+
+        // Dodger laughs :D
+        sokecry(otherPlayer.sokemon, 'は は はー');
+
+        // Show winner message
+        // TODO: Change font color?
+        battle_msg.textContent = 'MISS!';
+
+        anime({
+            delay: 0,
+            targets: battle_msg,
+            opacity: 1.0,
+            marginTop: '-=2vw',
+            easing: 'easeInOutQuad',
+            complete: function(anim) {
+
+                anime({
+                    delay: 2000,
+                    targets: battle_msg,
+                    opacity: 0,
+                    marginTop: '+=2vw',
+                    easing: 'easeInOutQuad'
+                });
+
+                // TODO: Miss sound? Need new audio for sound effect s
+            }
+        });
+    });
+
+
     // Attack!!! And get hit
     socket.on('hit', function(hit) {
         console.log('HIT!!', hit);
@@ -409,10 +494,10 @@
         console.log(hit.otherPlayer.name+' gets hit! HP -> '+hit.currentHP+'/'+hit.totalHP);
 
         // Stop the active player panel animation, if exists
-        if ( typeof activePlayerAnim != 'undefined' )
+        if ( typeof activePlayerAnim !== 'undefined' )
             activePlayerAnim.pause();
-
-        // TODO: Attack animation?
+        if ( typeof activePlayerFrameAnim !== 'undefined' )
+            activePlayerFrameAnim.pause();
 
         // Shake the other player's panel
         anime({
@@ -430,7 +515,6 @@
         sokecry(hit.otherPlayer.sokemon, 'いーたーいーいー');
 
         // Animate getting hit
-        // Show the effect
         battle_ef_atk.classList.toggle('on');
 
         anime({

@@ -55,7 +55,8 @@ io.on('connection', (socket) => {
     //////////////////////////////
     // User Management
 
-    var userPort = socket.handshake.headers.host.split(':')[1];
+    var userPort = socket.handshake.headers.referer.split(':')[2];
+    userPort = userPort.slice(0, userPort.length - 1);
 
     // Listen for users logging on
     console.log('a user connected', userPort);
@@ -186,14 +187,6 @@ io.on('connection', (socket) => {
 
     // BATTLE ACTIONS
 
-    // // Please wait!!
-    // socket.on('please wait', (ms) => {
-    //     console.log('Please wait '+ms+'ms');
-    //
-    //     setTimeout(() => {  console.log("Wait over!"); }, ms);
-    //
-    // });
-
     // battle action: attack
     socket.on('battle action: attack', (player) => {
         console.log(player.name+' wants to attack!');
@@ -218,24 +211,29 @@ io.on('connection', (socket) => {
 
                 console.log('- Target is '+otherPlayer.name);
 
-                // // Check if other player is dodging
-                // // TODO: doding
-                // if ( otherPlayer.dodging == true )
-                // {
-                //     // MISSSSS
-                //     // TODO: Miss message?
-                //     otherContender.dodging = false;
-                //
-                //     // Next player
-                //     if ( battle.turn.contender === 2 )
-                //         battle.turn.contender = 1;
-                //     else
-                //         battle.turn.contender = 2;
-                //
-                //     io.emit('whose turn?', battle);
-                // }
-                // else // ATTACK!!!
-                // {
+                // Check if other player is dodging
+                if ( typeof otherPlayer.dodging !== 'undefined'
+                        && otherPlayer.dodging == true )
+                {
+                    // MISSSSS
+                    io.emit('miss', battle);
+                    io.emit('dodge', otherPlayer);
+
+                    // Reset dodging state
+                    otherPlayer.dodging = false;
+
+                    // Next player
+                    if ( battle.turn.pid === 1 )
+                        battle.turn.pid = 0;
+                    else
+                        battle.turn.pid = 1;
+
+                    setTimeout(() => {
+                        io.emit('whose turn?', battle);
+                    }, 3000 );
+                }
+                else // ATTACK!!!
+                {
                     var otherCurrentHP = otherPlayer.sokemon.currentHP;
                     var otherHP = otherPlayer.sokemon.attributes.HP;
 
@@ -252,6 +250,7 @@ io.on('connection', (socket) => {
 
                     // ATTACKK!!!
                     io.emit('hit', {
+                        currentPlayer: player,
                         otherPlayer: otherPlayer,
                         currentHP: otherCurrentHP,
                         totalHP: otherHP
@@ -292,33 +291,38 @@ io.on('connection', (socket) => {
                             io.emit('whose turn?', battle);
                         }, 3000 );
                     }
-                // }
+                } // check if dodging
             } // check if their turn
         } // check if battle active
     });
 
-    // TODO: battle action: dodge
-    socket.on('battle action: dodge', (contender) => {
-        console.log('Contender wants to dodge: ' + contender.sokemon.name[0]);
+    // battle action: dodge
+    socket.on('battle action: dodge', (player) => {
+        console.log('Player wants to dodge: ' + player.sokemon.name[0]);
 
         // Can only dodge if the game has started
         if ( battle.state == 'active' )
         {
-            var activeContender = battle.contenders['contender'+battle.turn.contender];
+            var activePlayer = battle.players[battle.turn.pid];
 
             // Check if it's their turn
-            if ( activeContender.name == contender.sokemon.name[0] )
+            if ( player.name == activePlayer.name )
             {
                 // Set the dodging
-                activeContender.dodging = true;
+                activePlayer.dodging = true;
+
+                // DODGE!!!
+                io.emit('dodge', activePlayer);
 
                 // Next player
-                if ( battle.turn.contender === 2 )
-                    battle.turn.contender = 2;
+                if ( battle.turn.pid === 1 )
+                    battle.turn.pid = 0;
                 else
-                    battle.turn.contender = 1;
+                    battle.turn.pid = 1;
 
-                io.emit('whose turn?', battle);
+                setTimeout(() => {
+                    io.emit('whose turn?', battle);
+                }, 3000 );
             }
         } // check if game started
     });

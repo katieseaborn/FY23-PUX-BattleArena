@@ -160,6 +160,14 @@ button#music-control:active {
     left: 15vw;
 }
 
+.contender {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    width: 40vw;
+    min-height: 100%;
+}
+
 .zone {
     position: relative;
     background-color: #8EC5FC;
@@ -168,12 +176,15 @@ button#music-control:active {
     overflow: hidden;
     /* align-content: space-between;
     flex-direction: column; */
+    transition: all 0.4s; /* for switching bgs */
     width: 40vw;
     min-height: 100%;
 }
 .zone.alt1 {
-    background-color: #D9AFD9;
-    background-image: linear-gradient(0deg, #D9AFD9 0%, #97D9E1 100%);
+    /* background-color: #D9AFD9;
+    background-image: linear-gradient(0deg, #D9AFD9 0%, #97D9E1 100%); */
+    background-color: ##A770EF;
+    background-image: linear-gradient(0deg, #A770EF 0%, #CF8BF3 50%, #FDB99B 100%);
 }
 .zone.alt2 {
     background-image: linear-gradient( 0deg, rgba(252,225,208,1) 30%, rgba(255,173,214,1) 55.7%, rgba(162,186,245,1) 81.8% );
@@ -206,14 +217,16 @@ button#music-control:active {
 iframe {
     opacity: 0;
     background: none;
-    border: 0;
-    margin: 2vw;
+    border: 1vw solid transparent;
     padding: 0;
-    width: calc(100% - 4vw);
+    width: calc(100% - 2vw);
     min-height: 100%;
 }
 .left iframe {
     transform: scaleX(-1); /* flips horizontally */
+}
+iframe.active {
+    border-color: #fff;
 }
 
 .spanel {
@@ -233,7 +246,9 @@ iframe {
     left: -5vw;
 }
 .spanel.active {
-    border-color: #00E676;
+    /* border-color: #00E676; */
+    border-color: #EEFF41;
+    box-shadow: 0 0.2vw 0.3vw #607D8B;
 }
 .spanel .name {}
 .spanel .hp {
