@@ -15,8 +15,12 @@ Where sokémon come to battle.
 [x] Read in sokémon data, inc. attributes, visuals, animations, voice ...
 [x] Set up game interface: sokémon attributes, attacking ...
 [x] Game logic: waiting for challengers, countdown to start, turns, attacking, getting hit, fainting
-[ ] Add game event messages to chat
-[ ] Advanced game logic: critical hits, randomness in ATK value, critical health state, winning animations ...
+[x] Add game event messages to chat
+[-] Advanced game logic: critical hits, randomness in ATK value, critical health state, winning animations ...
 [x] Add battle music
-[-] Set up spectator chat
+[x] Set up spectator chat
 [-] Test with different computers/IPs on same network
+
+## Credits
+
+- Ditto background by kawart (http://kawart.tumblr.com/post/87440108770/repeating-ditto-pattern-free-for-your-use-but)

@@ -40,11 +40,11 @@ button#music-control.on {
 }
 button#music-control:hover {
     border-color: rgba(255,255,255,1);
-    background-color: #f57d7d;
+    background-color: #B0BEC5;
 }
 button#music-control.on:hover {
     border-color: rgba(255,255,255,1);
-    background-color: #B0BEC5;
+    background-color: #f57d7d;
 }
 button#music-control.on:active {
     border-color: #B0BEC5;
@@ -237,7 +237,7 @@ iframe.active {
     background-color: #fff;
     border: 3px solid #fff;
     border-radius: 0.5vw;
-    margin: 1vw;
+    margin: 1vw 2vw;
     padding: 1vw;
     width: 60%;
 }
@@ -264,9 +264,9 @@ iframe.active {
 }
 
 
-/* ............? */
+/* CHAT  */
 
- #form {
+#form {
      background: rgba(0, 0, 0, 0.15);
      padding: 0.25rem;
      position: fixed;
@@ -278,17 +278,17 @@ iframe.active {
      box-sizing: border-box;
      backdrop-filter: blur(10px);
 }
- #input {
+#input {
      border: none;
      padding: 0 1rem;
      flex-grow: 1;
      border-radius: 2rem;
      margin: 0.25rem;
 }
- #input:focus {
+#input:focus {
      outline: none;
 }
- #form > button {
+#form > button {
      background: #333;
      border: none;
      padding: 0 1rem;
@@ -297,15 +297,17 @@ iframe.active {
      outline: none;
      color: #fff;
 }
- #messages {
+#messages {
      list-style-type: none;
      margin: 0;
      padding: 0;
 }
- #messages > li {
+#messages > li {
      color: #fff;
      padding: 0.5rem 1rem;
 }
- #messages > li:nth-child(odd) {
+#messages > li:nth-child(odd) {
      background: #37474F;
 }
+#messages > li.user { color: rgb(206, 147, 216); }
+#messages > li.user:nth-child(odd) { color: rgb(179, 136, 255); }

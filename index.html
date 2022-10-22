@@ -38,7 +38,7 @@
     </section>
 
     <section id="music">
-        <button id="music-control" class="off">🎵</button>
+        <button id="music-control">🎵</button>
 
         <audio id="audio-music" autoplay loop>
             <source id="audio-music-source" src="music/104 - Now for the Adventure!.mp3" type="audio/mpeg">
@@ -84,17 +84,25 @@
         'music/412 - Battle! Champion.mp3'
     ];
 
-    function audio_fade() {
+    function audio_fade( turnOnBattleMusic ) {
         // Thanks to @jimmymeego: https://stackoverflow.com/questions/37762056/fade-out-of-a-mp3-song-using-javascript
         // Made some mods though ......
         if ( music.volume > 0 ) {
-            var toVol = music.volume -.2;
+            var toVol = music.volume -.01;
 
             if ( toVol < 0 )
                 toVol = 0;
-
             music.volume = toVol;
-            timer = setTimeout(audio_fade, 200);
+
+            // console.log('fade to', toVol);
+
+            if ( music.volume != 0 ) {
+                setInterval( audio_fade( turnOnBattleMusic ), 1000);
+            }
+            else // oncomplete
+            {
+                turnOnBattleMusic();
+            }
         }
     }
 
@@ -149,12 +157,16 @@
     // Chat Messages
 
     socket.on('get chat cache', function(log_cache) {
+        console.log('getting chat cache', log_cache);
 
         if ( log_cache )
         {
-            for (const msg of log_cache) {
+            for ( const msg of log_cache )
+            {
                 var log_msg = document.createElement('li');
-                log_msg.textContent = msg;
+                log_msg.classList.add(msg[0]);
+                log_msg.textContent = msg[1];
+
                 messages.appendChild(log_msg);
             }
 
@@ -163,10 +175,11 @@
         }
     });
 
-    socket.on('chat message', function(msg) {
-        var item = document.createElement('li');
-        item.textContent = msg;
-        messages.appendChild(item);
+    socket.on('get chat message', function(msg) {
+        var log_msg = document.createElement('li');
+        log_msg.classList.add(msg[0]);
+        log_msg.textContent = msg[1];
+        messages.appendChild(log_msg);
 
         // Scroll down log
         messages.scrollTop = messages.scrollHeight;
@@ -342,19 +355,17 @@
         // battle: state, players (contender), turn (pid, name)
         // contender: ip, port, name, sokemon
 
-        // Fade out and pause waiting music
-        audio_fade();
-        music.pause();
-
-        // Start random battle music
-        setTimeout(function()
+        // Fade out and pause waiting music, if on
+        if ( music_ctrl.classList.contains('on') )
         {
-            music.volume = 0.8;
-            music_src.src = battle_music[Math.floor(Math.random()*battle_music.length)];
-            music.load();
-            music.play();
-
-        }, 800);
+            audio_fade( function turnOnBattleMusic () {
+                music.pause();
+                music.volume = 0.8;
+                music_src.src = battle_music[Math.floor(Math.random()*battle_music.length)];
+                music.load();
+                music.play();
+            });
+        } // if music on
 
         // Show start message
         battle_msg.textContent = 'Start!';
@@ -389,15 +400,20 @@
         // battle: state, players (contender), turn (pid, name)
         // contender: ip, port, name, sokemon
 
-        // Pause the active player panel anime, if exists
-        if ( typeof activePlayerAnim != 'undefined' )
-            activePlayerAnim.pause();
-
         var player = battle.players[battle.turn.pid];
 
         var otherPlayer = battle.players[0];
         if ( battle.turn.pid === 0 )
             otherPlayer = battle.players[1];
+
+        // Pause the player panel anime, if exists
+        if ( typeof activePlayerAnim != 'undefined' )
+            activePlayerAnim.pause();
+
+        if ( typeof activePlayerFrameAnim != 'undefined' ) {
+            activePlayerFrameAnim.pause();
+            document.getElementById('con-'+otherPlayer.name).style.borderColor = 'transparent';
+        }
 
         // Unhighlight previous, if exists ???
         if ( typeof otherPlayer != 'undefined' )
@@ -478,7 +494,6 @@
         });
     });
 
-
     // Attack!!! And get hit
     socket.on('hit', function(hit) {
         console.log('HIT!!', hit);
@@ -493,11 +508,14 @@
         // conHP.setAttribute('style', 'width: '+wHP+'px');
         console.log(hit.otherPlayer.name+' gets hit! HP -> '+hit.currentHP+'/'+hit.totalHP);
 
-        // Stop the active player panel animation, if exists
+        // Stop the player panel animation, if exists
         if ( typeof activePlayerAnim !== 'undefined' )
             activePlayerAnim.pause();
-        if ( typeof activePlayerFrameAnim !== 'undefined' )
+
+        if ( typeof activePlayerFrameAnim != 'undefined' ) {
             activePlayerFrameAnim.pause();
+            document.getElementById('con-'+hit.otherPlayer.name).style.borderColor = 'transparent';
+        }
 
         // Shake the other player's panel
         anime({
@@ -546,12 +564,19 @@
     socket.on('winner', function(player) {
         console.log('WINNER: '+ player.name);
 
-        // Fade out and pause battle music
-        audio_fade();
-        music.pause();
+        // Remove highlight border
+        document.getElementById('con-'+player.name).style.borderColor = 'transparent';
+
+        // Fade out and pause battle music, if on
+        if ( music_ctrl.classList.contains('on') )
+        {
+            audio_fade( function turnOnBattleMusic () {
+                music.pause();
+            });
+        }
 
         // Winner cry
-        sokecry(player.sokemon, 'やったー！');
+        sokecry(player.sokemon, 'やった！');
 
         // Show winner message
         battle_msg.textContent = 'Winner!';
@@ -574,10 +599,13 @@
 
                 // Let server know it's on?
                 // TODO: Hearts animation?
-                music_src.src = music_src_default;
-                music.load();
-                music.volume = 0.8;
-                music.play();
+                if ( music_ctrl.classList.contains('on') )
+                {
+                    music_src.src = 'music/115 - Victory Against Wild Pokémon.mp3';
+                    music.load();
+                    music.volume = 0.8;
+                    music.play();
+                }
             }
         });
     });

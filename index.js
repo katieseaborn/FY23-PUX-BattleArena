@@ -37,7 +37,7 @@ app.get('/chat', (req, res) => {
 
 // Cache
 const cache = {
-    messages: []
+    messages: [] // array of arrays: who, msg
 };
 
 // Battle
@@ -62,18 +62,19 @@ io.on('connection', (socket) => {
     console.log('a user connected', userPort);
 
     // Send the cached messages
-    io.emit('get chat cache', cache.messages);
+    // io.emit('get chat cache', cache.messages);
 
     // Listen for users disconnecting
     socket.on('disconnect', () => {
         console.log('user disconnected', userPort);
     });
 
-    // Chat messages
-    socket.on('chat message', (msg) => {
-        console.log('message: ' + msg);
+    // Get chat messages
+    socket.on('send chat message', (msg) => {
+        console.log('message received: ' + msg);
+
         cache.messages.push(msg);
-        io.emit('chat message', msg);
+        io.emit('get chat message', msg);
     });
 
 
@@ -88,7 +89,11 @@ io.on('connection', (socket) => {
         battle.turn.pid = 0;
         battle.turn.name = '';
 
+        // Send the cached messages
+        io.emit('get chat cache', cache.messages);
+
         console.log('battle:', battle);
+        console.log('chat cache:', cache);
     }
 
     // Join battle
@@ -119,9 +124,9 @@ io.on('connection', (socket) => {
                 battle.players.push(contender);
 
                 // Announce the contender
-                var msg = 'A contender has appeared: '+contender.name+'!';
+                var msg = ['game', 'A contender has appeared: '+contender.name+'!'];
                 io.emit('new contender', contender);
-                io.emit('chat message', msg);
+                io.emit('get chat message', msg);
                 cache.messages.push(msg);
 
                 reg_status = 'newly';
@@ -164,10 +169,12 @@ io.on('connection', (socket) => {
 
         if ( removed )
         {
-            // Announce
-            var msg = 'Contender '+contender.name+' has left the battle!';
-            io.emit('chat message', msg);
+            // Remove from arena
             io.emit('remove contender', contender);
+
+            // Announce
+            var msg = ['game', 'Contender '+contender.name+' has left the battle!'];
+            io.emit('get chat message', msg);
             cache.messages.push(msg);
         }
         else {
@@ -182,6 +189,12 @@ io.on('connection', (socket) => {
 
         battle.state = 'active';
 
+        // Announce
+        var msg = ['game', 'Battle START!'];
+        io.emit('get chat message', msg);
+        cache.messages.push(msg);
+
+        // Continue
         io.emit('whose turn?', battle);
     });
 
@@ -219,6 +232,11 @@ io.on('connection', (socket) => {
                     io.emit('miss', battle);
                     io.emit('dodge', otherPlayer);
 
+                    // Announce
+                    var msg = ['game', activePlayer.name+' MISSES!'];
+                    io.emit('get chat message', msg);
+                    cache.messages.push(msg);
+
                     // Reset dodging state
                     otherPlayer.dodging = false;
 
@@ -238,8 +256,23 @@ io.on('connection', (socket) => {
                     var otherHP = otherPlayer.sokemon.attributes.HP;
 
                     var activeConAtk = activePlayer.sokemon.attributes.Attack;
+
                     // TODO: Add random super effective
                     activeConAtk = activeConAtk / 5; // rough
+
+                    // Add some randomness
+                    activeConAtk += Math.floor(Math.random()*5);
+
+                    // And sometimes CRITICALLLLLL !!!!!!
+                    var criticalHit = '';
+
+                    if (  Math.floor(Math.random()*5) == 4 )
+                    {
+                        criticalHit = ' It\s a critical hit!';
+                        activeConAtk *= 1.5;
+                    }
+
+                    console.log('ATK:', activeConAtk);
 
                     // Calculate damage
                     otherCurrentHP = otherCurrentHP - activeConAtk;
@@ -255,6 +288,11 @@ io.on('connection', (socket) => {
                         currentHP: otherCurrentHP,
                         totalHP: otherHP
                     });
+
+                    // Announce
+                    var msg = ['game', activePlayer.name+' ATTACKS!'+criticalHit];
+                    io.emit('get chat message', msg);
+                    cache.messages.push(msg);
 
                     if ( otherCurrentHP === 0 )
                     {
@@ -274,8 +312,8 @@ io.on('connection', (socket) => {
                             battle.players.splice(1, 1);
 
                         // Announce
-                        var msg = 'Player '+otherPlayer.name+' has left the battle!';
-                        io.emit('chat message', msg);
+                        var msg = ['game', 'Player '+otherPlayer.name+' has fainted! '+activePlayer.name+' WINS!'];
+                        io.emit('get chat message', msg);
                         io.emit('remove contender', otherPlayer);
                         cache.messages.push(msg);
                     }
@@ -313,6 +351,11 @@ io.on('connection', (socket) => {
 
                 // DODGE!!!
                 io.emit('dodge', activePlayer);
+
+                // Announce
+                var msg = ['game', activePlayer.name+' prepares to dodge!'];
+                io.emit('get chat message', msg);
+                cache.messages.push(msg);
 
                 // Next player
                 if ( battle.turn.pid === 1 )
