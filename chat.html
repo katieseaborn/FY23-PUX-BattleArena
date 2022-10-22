@@ -2,8 +2,13 @@
 <html>
     <head>
         <title>Battle Arena</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" href="favicon.ico?v=1.4">
         <style>
+
+        html, body {
+            height: 100%;
+        }
         body {
             background: rgba(0, 0, 0, 0.9) url('img/ditto-bg.png') repeat;
             background-size: 50%;
@@ -11,7 +16,6 @@
             font-size: 14pt;
             margin: 0;
             padding-bottom: 3rem;
-            height: 100%;
         }
 
         #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3.5rem; box-sizing: border-box; backdrop-filter: blur(10px); }
@@ -33,6 +37,34 @@
         #messages > li:nth-child(odd) { color: #ccc; background-color: rgba(0,0,0,0.8); }
         #messages > li.user { color: rgb(206, 147, 216); }
         #messages > li.user:nth-child(odd) { color: rgb(179, 136, 255); }
+
+        @media (max-width:480px)  {
+            body {
+                /* position: relative; */
+            }
+            #chat, #messages {
+                /* position: absolute;
+                bottom: 3.5rem;
+                left: 0; */
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                /* align-items: flex-end; */
+                /* align-content: flex-end; */
+                /* border: 3px solid red; */
+                width: 100%;
+                /* height: calc(100vh - 5rem); */
+                height: 100%;
+            }
+            #messages > li {
+                align-self: flex-end;
+                width: calc(100% - 2rem);
+            }
+            #form {
+                height: 3rem;
+            }
+        }
         </style>
     </head>
     <body>
