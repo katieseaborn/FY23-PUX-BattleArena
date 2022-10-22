@@ -55,7 +55,7 @@
     var form = document.getElementById('form');
     var input = document.getElementById('input');
 
-    // TODO: Target only this user; requires socket.id log in server 
+    // TODO: Target only this user; requires socket.id log in server
     // socket.on('get chat cache', function(log_cache) {
     //     console.log('get chat cache:', log_cache);
     //
@@ -90,7 +90,8 @@
 
         messages.appendChild(log_msg);
 
-        window.scrollTo(0, document.body.scrollHeight);
+        // Scroll down log
+        messages.scrollTop = messages.scrollHeight;
     });
     </script>
   </body>
