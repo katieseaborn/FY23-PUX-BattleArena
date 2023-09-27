@@ -1,5 +1,6 @@
 // Server-side
-const express = require('express');
+// const express = require('express');
+const port = process.env.PORT || 3000;
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
@@ -376,6 +377,6 @@ io.on('connection', (socket) => {
 // io.emit('some event', { someProperty: 'some value', otherProperty: 'other value' }); // This will emit the event to all connected sockets
 
 
-server.listen(9999, () => {
-  console.log('listening on *:9999');
+server.listen(port, () => {
+  console.log('listening on *:'+port);
 });
