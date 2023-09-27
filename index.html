@@ -52,7 +52,7 @@
     <script>
 
     // Client-side
-    var socket = io();
+    var socket = io("http://localhost", { "transports": ['websocket'] });
 
     //////////////////////////
     // Variables
