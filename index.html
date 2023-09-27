@@ -53,8 +53,12 @@
 
     // Client-side
     // e.g., http://localhost:9999/socket.io/?EIO=4&transport=polling&t=OhOpGA9
-    var socket = io();
-    // var socket = io( "ws://" + location.host + "/", { "transports": ['websocket'] } );
+    // var socket = io();
+    var socket = io( "ws://" + location.host + "/", { 
+        path: '/socket.io',
+        transports: ['websocket'],
+        secure: true
+    } );
 
     //////////////////////////
     // Variables

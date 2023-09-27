@@ -83,8 +83,12 @@
     <script>
 
     // Client-side
-    var socket = io();
-    // var socket = io( "ws://" + location.host + "/", { "transports": ['websocket'] } );
+    // var socket = io();
+    var socket = io( "ws://" + location.host + "/", { 
+        path: '/socket.io',
+        transports: ['websocket'],
+        secure: true
+    } );
 
     var messages = document.getElementById('messages');
     var form = document.getElementById('form');
@@ -113,7 +117,7 @@
 
     // Get chat cache from battle arena
     socket.on('get chat cache', function(log_cache) {
-        console.log('get chat cache:', log_cache);
+        console.log('get chat cache');
     
         if ( log_cache )
         {
