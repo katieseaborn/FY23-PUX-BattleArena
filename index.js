@@ -56,8 +56,12 @@ io.on('connection', (socket) => {
     //////////////////////////////
     // User Management
 
-    var user;
-    var userPort = socket.handshake.headers.referer.split(':')[2];
+    var user, userPort;
+
+    if ( socket.handshake.headers.referer )
+        userPort = socket.handshake.headers.referer.split(':')[2];
+    else
+        userPort = socket.handshake.headers.origin.split(':')[2];
     userPort = userPort.slice(0, userPort.length - 1);
 
     // Send the cached messages
