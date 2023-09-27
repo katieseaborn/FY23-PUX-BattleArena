@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Battle Arena</title>
+        <title>Chat: Battle Arena</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" href="favicon.ico?v=1.4">
@@ -83,8 +83,8 @@
     <script>
 
     // Client-side
-    // var socket = io();
-    var socket = io( "ws://" + location.host + "/", { "transports": ['websocket'] } );
+    var socket = io();
+    // var socket = io( "ws://" + location.host + "/", { "transports": ['websocket'] } );
 
     var messages = document.getElementById('messages');
     var form = document.getElementById('form');
@@ -111,7 +111,7 @@
 
     socket.emit('request for chat cache', username.value);
 
-    // TODO: Target only this user; requires socket.id log in server
+    // Get chat cache from battle arena
     socket.on('get chat cache', function(log_cache) {
         console.log('get chat cache:', log_cache);
     
