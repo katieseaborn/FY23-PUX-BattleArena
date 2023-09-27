@@ -25,15 +25,14 @@ button#music-control {
     box-sizing: border-box;
     cursor: pointer;
     display: inline-block;
-    font-size: .5rem;
+    font-size: .75rem;
     text-decoration: none;
-    padding: 0.1rem .5rem;
+    padding: 0.2rem .75rem;
     margin: 0;
     color: #FFFFFF;
     text-shadow: 0 0.04rem 0.04rem rgba(0,0,0,0.35);
     text-align: center;
     transition: all 0.2s;
-    /* min-width: 15vw; */
 }
 button#music-control.on {
     background-color: #f14e4e;
@@ -309,5 +308,5 @@ iframe.active {
 #messages > li:nth-child(odd) {
      background: #37474F;
 }
-#messages > li.user { color: rgb(206, 147, 216); }
-#messages > li.user:nth-child(odd) { color: rgb(179, 136, 255); }
+#messages > li { color: rgb(206, 147, 216); }
+#messages > li:nth-child(odd) { color: rgb(179, 136, 255); }

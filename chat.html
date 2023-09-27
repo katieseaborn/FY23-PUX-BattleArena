@@ -19,17 +19,18 @@
         }
 
         #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3.5rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-        #input { border: none; font-size: inherit; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-        #input:focus { outline: none; }
+        input[type='text'] { border: none; font-size: inherit; padding: 0 1rem; border-radius: 2rem; margin: 0.25rem; width: 100%; }
+        input[type='text']#username { width: 25%; }
+        input[type='text']:focus { outline: none; }
         #form > button { cursor: pointer; font-weight: bold; font-size: inherit; background: #333; border: 0.4vw solid transparent; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
         #form > button:hover {
             background-color: rgb(234, 128, 252);
-            border-color: rgb(225, 190, 231);
+            border-color: rgba(0,0,0,0.7);
         }
         #form > button:active {
-            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.7);
             border-color: rgb(234, 128, 252);
-            color: rgb(123, 31, 162);
+            color: rgb(234, 128, 252);
         }
 
         #messages { overflow-y: scroll; height: calc(100vh - 3.5rem); list-style-type: none; margin: 0; padding: 0; }
@@ -39,22 +40,12 @@
         #messages > li.user:nth-child(odd) { color: rgb(179, 136, 255); }
 
         @media (max-width:480px)  {
-            body {
-                /* position: relative; */
-            }
             #chat, #messages {
-                /* position: absolute;
-                bottom: 3.5rem;
-                left: 0; */
                 flex: 1;
                 display: flex;
                 flex-direction: column;
                 justify-content: flex-end;
-                /* align-items: flex-end; */
-                /* align-content: flex-end; */
-                /* border: 3px solid red; */
                 width: 100%;
-                /* height: calc(100vh - 5rem); */
                 height: 100%;
             }
             #messages > li {
@@ -73,7 +64,9 @@
         <ul id="messages"></ul>
 
         <form id="form" action="">
-            <input id="input" autocomplete="off" /><button>Send</button>
+            <input id="username" type="text" autocomplete="off" placeholder="お名前">
+            <input id="chatinput" type="text" autocomplete="off" placeholder="メッセージ">
+            <button>Send</button>
         </form>
     </section>
 
@@ -85,7 +78,11 @@
 
     var messages = document.getElementById('messages');
     var form = document.getElementById('form');
-    var input = document.getElementById('input');
+    var username = document.getElementById('username');
+    var chatinput = document.getElementById('chatinput');
+
+    // Target username
+    username.focus();
 
     // TODO: Target only this user; requires socket.id log in server
     // socket.on('get chat cache', function(log_cache) {
@@ -107,20 +104,33 @@
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        if (input.value) {
-            socket.emit('send chat message', ['user', input.value]);
-            input.value = '';
+
+        // Only if a name is provided
+        if ( username.value ) {
+            // Only if a message is provided
+            if ( chatinput.value ) {
+                socket.emit('send chat message', [username.value, chatinput.value]);
+                chatinput.value = '';
+
+                // Target chatinput
+                chatinput.focus();
+            } else {
+                alert("メッセージを記入してください");
+            }
+        } else {
+            alert("お名前を記入してください");
         }
     });
 
     socket.on('get chat message', function(msg) {
-        console.log('chat msg:', msg);
+        console.log('chat msg:', msg[0], msg[1]);
 
-        var log_msg = document.createElement('li');
-        log_msg.classList.add(msg[0]);
-        log_msg.textContent = msg[1];
+        var chat_msg = document.createElement('li');
+        chat_msg.classList.add(msg[0]);
+        chat_msg.textContent = msg[0] + ': '+ msg[1];
 
-        messages.appendChild(log_msg);
+        // Show message
+        messages.appendChild(chat_msg);
 
         // Scroll down log
         messages.scrollTop = messages.scrollHeight;

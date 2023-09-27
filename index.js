@@ -70,8 +70,9 @@ io.on('connection', (socket) => {
     });
 
     // Get chat messages
+    // Format: [username, message]
     socket.on('send chat message', (msg) => {
-        console.log('message received: ' + msg);
+        console.log('message received: ' + msg[0], msg[1]);
 
         cache.messages.push(msg);
         io.emit('get chat message', msg);

@@ -1,9 +1,16 @@
-# FY22-PUX-BattleArena
+# FY23-PUX-BattleArena
 
 Where sokémon come to battle.
 
+## Install
+
+- cd to the directory
+- npm install
+
 ## Usage
 
+- cd to the directory
+- node index or nodemon index
 - For the battle arena, go to http://localhost:9999
 - For the chat, go to http://localhost:9999/chat
 

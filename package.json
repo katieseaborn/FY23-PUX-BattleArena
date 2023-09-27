@@ -1,6 +1,6 @@
 {
   "name": "battle-arena",
-  "version": "0.0.1",
+  "version": "2.0",
   "description": "Where sokémon come to battle.",
   "dependencies": {
     "socket.io": "^4.5.3",

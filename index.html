@@ -141,6 +141,7 @@
             // Turn on/off music
             if ( music_ctrl.classList.contains('on') ) {
                 music.pause();
+                music_anim.pause();
             } else {
                 music.play();
                 music_anim.play();
@@ -157,7 +158,7 @@
     // Chat Messages
 
     socket.on('get chat cache', function(log_cache) {
-        console.log('getting chat cache', log_cache);
+        console.log('getting chat cache');
 
         if ( log_cache )
         {
@@ -165,7 +166,7 @@
             {
                 var log_msg = document.createElement('li');
                 log_msg.classList.add(msg[0]);
-                log_msg.textContent = msg[1];
+                log_msg.textContent = msg[0] + ': '+ msg[1];
 
                 messages.appendChild(log_msg);
             }
@@ -178,7 +179,7 @@
     socket.on('get chat message', function(msg) {
         var log_msg = document.createElement('li');
         log_msg.classList.add(msg[0]);
-        log_msg.textContent = msg[1];
+        log_msg.textContent = msg[0] + ': '+ msg[1];
         messages.appendChild(log_msg);
 
         // Scroll down log
