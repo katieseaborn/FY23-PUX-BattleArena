@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>Battle Arena</title>
+        <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" href="favicon.ico?v=1.4">
         <style>
@@ -15,8 +16,22 @@
             font-family: Helvetica, sans-serif;
             font-size: 14pt;
             margin: 0;
-            padding-bottom: 3rem;
+            /* padding-bottom: 3rem; */
         }
+
+        #chat, #messages {
+            /* flex: 1; */
+            /* display: flex;
+            flex-direction: column;
+            justify-content: flex-end; */
+            width: 100vw;
+            height: 100vh;
+        }
+        #messages { overflow-y: auto; height: calc(100vh - 3.5rem - .5rem); list-style-type: none; margin: 0; padding: 0; }
+        #messages > li { align-self: flex-end; color: #fff; background-color: rgba(0,0,0,0.7); padding: 0.5rem 1rem; }
+        #messages > li:nth-child(odd) { color: #ccc; background-color: rgba(0,0,0,0.8); }
+        #messages > li.user { color: rgb(206, 147, 216); }
+        #messages > li.user:nth-child(odd) { color: rgb(179, 136, 255); }
 
         #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3.5rem; box-sizing: border-box; backdrop-filter: blur(10px); }
         input[type='text'] { border: none; font-size: inherit; padding: 0 1rem; border-radius: 2rem; margin: 0.25rem; width: 100%; }
@@ -32,12 +47,6 @@
             border-color: rgb(234, 128, 252);
             color: rgb(234, 128, 252);
         }
-
-        #messages { overflow-y: scroll; height: calc(100vh - 3.5rem); list-style-type: none; margin: 0; padding: 0; }
-        #messages > li { color: #fff; background-color: rgba(0,0,0,0.7); padding: 0.5rem 1rem; }
-        #messages > li:nth-child(odd) { color: #ccc; background-color: rgba(0,0,0,0.8); }
-        #messages > li.user { color: rgb(206, 147, 216); }
-        #messages > li.user:nth-child(odd) { color: rgb(179, 136, 255); }
 
         @media (max-width:480px)  {
             #chat, #messages {
@@ -80,27 +89,44 @@
     var form = document.getElementById('form');
     var username = document.getElementById('username');
     var chatinput = document.getElementById('chatinput');
+    var datetimenow = new Date();
 
     // Target username
     username.focus();
 
+    // Set a random ID ... which changes on refresh or user input
+    // Thanks to Teocci @ StackOverlow
+    String.prototype.hashCode = function() {
+        var hash = 0, i, chr;
+        if (this.length === 0) return hash;
+        for (i = 0; i < this.length; i++) {
+            chr = this.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return hash;
+    }
+    username.value = 'user'+datetimenow.toString().hashCode();
+
+    socket.emit('request for chat cache', username.value);
+
     // TODO: Target only this user; requires socket.id log in server
-    // socket.on('get chat cache', function(log_cache) {
-    //     console.log('get chat cache:', log_cache);
-    //
-    //     if ( log_cache )
-    //     {
-    //         for (const msg of log_cache) {
-    //             var log_msg = document.createElement('li');
-    //             log_msg.classList.add(msg[0]);
-    //             log_msg.textContent = msg[1]+'CACHE';
-    //             messages.appendChild(log_msg);
-    //         }
-    //
-    //         // Scroll down log
-    //         messages.scrollTop = messages.scrollHeight;
-    //     }
-    // });
+    socket.on('get chat cache', function(log_cache) {
+        console.log('get chat cache:', log_cache);
+    
+        if ( log_cache )
+        {
+            for (const msg of log_cache) {
+                var log_msg = document.createElement('li');
+                log_msg.classList.add(msg[0]);
+                log_msg.textContent = msg[0] + ': '+ msg[1];
+                messages.appendChild(log_msg);
+            }
+    
+            // Scroll down log
+            messages.scrollTop = messages.scrollHeight;
+        }
+    });
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();

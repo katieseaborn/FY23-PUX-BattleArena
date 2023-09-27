@@ -56,18 +56,30 @@ io.on('connection', (socket) => {
     //////////////////////////////
     // User Management
 
+    var user;
     var userPort = socket.handshake.headers.referer.split(':')[2];
     userPort = userPort.slice(0, userPort.length - 1);
 
-    // Listen for users logging on
-    console.log('a user connected', userPort);
-
     // Send the cached messages
-    // io.emit('get chat cache', cache.messages);
+    socket.on('request for chat cache', (userid) => {
+
+        user = userid;
+
+        // Listen for users logging on
+        console.log('a user connected', user);
+
+        console.log('request for chat cache by ' + user);
+
+        io.emit('get chat cache', cache.messages);
+    });
 
     // Listen for users disconnecting
     socket.on('disconnect', () => {
-        console.log('user disconnected', userPort);
+
+        if ( ! user )
+            console.log('battle arena disconnected');
+        else
+            console.log('user disconnected', user);
     });
 
     // Get chat messages
