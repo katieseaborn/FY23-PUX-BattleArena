@@ -51,6 +51,10 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
 
+    // Get audio path
+    var audiopath = window.location.search.substring(1).split("=");
+    audiopath = audiopath[1];
+
     // Client-side
     // e.g., http://localhost:9999/socket.io/?EIO=4&transport=polling&t=OhOpGA9
     // var socket = io();
@@ -69,7 +73,8 @@
     var music_ctrl = document.getElementById('music-control');
     var music = document.getElementById('audio-music');
     var music_src = document.getElementById('audio-music-source');
-    var music_src_default = 'music/104 - Now for the Adventure!.mp3';
+    var music_src_default = audiopath + 'music/104 - Now for the Adventure!.mp3';
+    music_src.src = music_src_default;
     var messages = document.getElementById('messages');
     var zone1 = document.getElementById('contender1');
     var zone2 = document.getElementById('contender2');
@@ -375,7 +380,7 @@
             audio_fade( function turnOnBattleMusic () {
                 music.pause();
                 music.volume = 0.8;
-                music_src.src = battle_music[Math.floor(Math.random()*battle_music.length)];
+                music_src.src = audiopath + battle_music[Math.floor(Math.random()*battle_music.length)];
                 music.load();
                 music.play();
             });
@@ -615,7 +620,7 @@
                 // TODO: Hearts animation?
                 if ( music_ctrl.classList.contains('on') )
                 {
-                    music_src.src = 'music/115 - Victory Against Wild Pokémon.mp3';
+                    music_src.src = audiopath + 'music/115 - Victory Against Wild Pokémon.mp3';
                     music.load();
                     music.volume = 0.8;
                     music.play();
@@ -625,7 +630,7 @@
     });
 
     socket.on('cry', function(player) {
-        console.log('crier: ', player);
+        console.log('crier: ', player.name);
 
         sokecry(player.sokemon);
     });

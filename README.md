@@ -4,15 +4,17 @@ Where sokémon come to battle.
 
 ## Install
 
-- cd to the directory
-- npm install
+- `cd` to the directory in the command line, e.g., Terminal
+- run `npm install`
 
 ## Usage
 
-- cd to the directory
-- node index or nodemon index
-- For the battle arena, go to http://localhost:9999
-- For the chat, go to http://localhost:9999/chat
+- `cd` to the directory
+- `node index` or `nodemon index`
+- For the battle arena, go to http://localhost:9999 or https://battlearena.adaptable.app
+  - If using Firefox, go to `about:config` and set `security.mixed_content.block_active_content` to `false`
+  - If using music, specify the path to the local folder containing the folder with the mp3s using `?audiopath=` in the URL, e.g., `?audiopath=/Users/username/gitprojs/FY23-PUX-BattleArena/public/`
+- For the chat, go to http://localhost:9999/chat or https://battlearena.adaptable.app/chat
 
 ## To-do:
 
@@ -26,7 +28,8 @@ Where sokémon come to battle.
 [-] Advanced game logic: critical hits, randomness in ATK value, critical health state, winning animations ...
 [x] Add battle music
 [x] Set up spectator chat
-[-] Test with different computers/IPs on same network
+[x] Set Battle Arena up on Adaptable.io
+[x] Allow chat users to specify username
 
 ## Credits
 
