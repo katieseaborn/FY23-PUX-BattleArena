@@ -79,14 +79,7 @@ io.on('connection', (socket) => {
     //////////////////////////////
     // User Management
 
-    // var user, userPort;
     var user;
-
-    // if ( socket.handshake.headers.referer )
-    //     userPort = socket.handshake.headers.referer.split(':')[2];
-    // else
-    //     userPort = socket.handshake.headers.origin.split(':')[2];
-    // userPort = userPort.slice(0, userPort.length - 1);
 
     // Send the cached messages
     socket.on('request for chat cache', (userid) => {
@@ -412,6 +405,20 @@ io.on('connection', (socket) => {
                 }, 3000 );
             }
         } // check if game started
+    });
+
+    // battle action: cry
+    socket.on('battle action: cry', (player) => {
+        console.log('Player wants to cry: ' + player.sokemon.name[0]);
+
+        // CRY!!!
+        io.emit('cry', player);
+
+        // Announce
+        var msg = ['game', player.name+' cries!'];
+        io.emit('get chat message', msg);
+        cache.messages.push(msg);
+
     });
 
   // socket.broadcast.emit('hi');
