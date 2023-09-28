@@ -6,12 +6,15 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 // const ip = require('ip');
-var prtcl = 'http';
-if ( location.host.search('adaptable') != -1 ) prtcl = 'https';
 const io = require("socket.io")(server, {
     cors: {
         // origin: "https://battlearena.adaptable.app/",
-        origin: prtcl + "://" + location.host + "/",
+        origin: [
+            "https://battlearena.adaptable.app/",
+            "http://localhost:9999",
+            "https://localhost:9999",
+            "http://localhost:3001",
+        ],
         methods: ["GET", "POST"],
         allowedHeaders: ["sokemon"],
         credentials: true,
