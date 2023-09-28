@@ -17,6 +17,7 @@ const io = require("socket.io")(server, {
             "https://localhost:3001",
             "http://"+ip.address()+":3001",
             "https://"+ip.address()+":3001",
+            "*"
         ],
         methods: ["GET", "POST"],
         allowedHeaders: ["sokemon"],
