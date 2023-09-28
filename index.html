@@ -624,6 +624,12 @@
         });
     });
 
+    socket.on('cry', function(player) {
+        console.log('crier: ', player);
+
+        sokecry(player.sokemon);
+    });
+
     // Just in case, I'll handle the voice
     let sokecry = function (sokemon, speech='')
     {
