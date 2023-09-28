@@ -13,7 +13,7 @@ Where sokémon come to battle.
 - `node index` or `nodemon index`
 - For the battle arena, go to http://localhost:9999 or https://battlearena.adaptable.app
   - If using Firefox, go to `about:config` and set `security.mixed_content.block_active_content` to `false`
-  - If using music, specify the path to the local folder containing the folder with the mp3s using `?audiopath=` in the URL, e.g., `?audiopath=/Users/username/gitprojs/FY23-PUX-BattleArena/public/`
+  - If using music, make sure ttp://localhost:9999 is running locally and the songs are present in a `public/music` folder on the local machine
 - For the chat, go to http://localhost:9999/chat or https://battlearena.adaptable.app/chat
 
 ## To-do:

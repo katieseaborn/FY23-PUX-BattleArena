@@ -57,6 +57,13 @@ app.get('/chat', (req, res) => {
     res.sendFile(__dirname + '/chat.html');
 });
 
+app.get('/music', (req, res) => {
+    // console.log(__dirname + '/public/' + req.query.song);
+    if ( req.query.song
+            && req.query.song != '' )
+        res.sendFile(__dirname + '/public/' + req.query.song );
+})
+
 //////////////////////////////
 
 // Cache
