@@ -8,17 +8,17 @@ const { Server } = require("socket.io");
 const ip = require('ip');
 const io = require("socket.io")(server, {
     cors: {
+        origin: "*",
         // origin: "https://battlearena.adaptable.app/",
-        origin: [
-            // "https://battlearena.adaptable.app/",
-            // "http://localhost:9999",
-            // "https://localhost:9999",
-            "http://localhost:3001",
-            "https://localhost:3001",
-            "http://"+ip.address()+":3001",
-            "https://"+ip.address()+":3001",
-            "*"
-        ],
+        // origin: [
+        //     // "https://battlearena.adaptable.app/",
+        //     // "http://localhost:9999",
+        //     // "https://localhost:9999",
+        //     "http://localhost:3001",
+        //     "https://localhost:3001",
+        //     "http://"+ip.address()+":3001",
+        //     "https://"+ip.address()+":3001",
+        // ],
         methods: ["GET", "POST"],
         allowedHeaders: ["sokemon"],
         credentials: true,
