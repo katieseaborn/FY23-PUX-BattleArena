@@ -16,14 +16,9 @@
             font-family: Helvetica, sans-serif;
             font-size: 14pt;
             margin: 0;
-            /* padding-bottom: 3rem; */
         }
 
         #chat, #messages {
-            /* flex: 1; */
-            /* display: flex;
-            flex-direction: column;
-            justify-content: flex-end; */
             width: 100vw;
             height: 100vh;
         }
@@ -84,7 +79,10 @@
 
     // Client-side
     // var socket = io();
-    var socket = io( "ws://" + location.host + "/", { 
+    var prtcl = 'ws';
+    if ( location.host.search('adaptable') != -1 ) prtcl = 'wss';
+
+    var socket = io( prtcl + "://" + location.host + "/", { 
         path: '/socket.io',
         transports: ['websocket'],
         secure: true

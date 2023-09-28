@@ -54,7 +54,10 @@
     // Client-side
     // e.g., http://localhost:9999/socket.io/?EIO=4&transport=polling&t=OhOpGA9
     // var socket = io();
-    var socket = io( "ws://" + location.host + "/", { 
+    var prtcl = 'ws';
+    if ( location.host.search('adaptable') != -1 ) prtcl = 'wss';
+
+    var socket = io( prtcl + "://" + location.host + "/", { 
         path: '/socket.io',
         transports: ['websocket'],
         secure: true
