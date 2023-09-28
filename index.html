@@ -627,31 +627,33 @@
     socket.on('cry', function(player) {
         console.log('crier: ', player.name);
 
-        sokecry(player.sokemon);
+        // TODO: Maybe not here ...
+        // sokecry(player.sokemon);
     });
 
     // Just in case, I'll handle the voice
     let sokecry = function (sokemon, speech='')
     {
-        if ( speech == '' )
-            speech = sokemon.voice.cry;
+        console.log(sokemon);
+        // if ( speech == '' )
+        //     speech = sokemon.voice.cry;
 
-        const utterThis = new SpeechSynthesisUtterance( speech );
+        // const utterThis = new SpeechSynthesisUtterance( speech );
 
-        // Set the voice
-        for (const synthVoice of voices) {
-            if (synthVoice.name === sokemon.voice.name) {
-                utterThis.voice = synthVoice;
-            }
-        }
+        // // Set the voice
+        // for (const synthVoice of voices) {
+        //     if (synthVoice.name === sokemon.voice.name) {
+        //         utterThis.voice = synthVoice;
+        //     }
+        // }
 
-        // Set the voice properties
-        utterThis.pitch = sokemon.voice.pitch;
-        utterThis.rate = sokemon.voice.rate;
-        utterThis.volume = 1;
+        // // Set the voice properties
+        // utterThis.pitch = sokemon.voice.pitch;
+        // utterThis.rate = sokemon.voice.rate;
+        // utterThis.volume = 1;
 
-        // Then speak
-        synth.speak( utterThis );
+        // // Then speak
+        // synth.speak( utterThis );
     };
 
     </script>
