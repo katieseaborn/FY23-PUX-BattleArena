@@ -117,8 +117,11 @@
     socket.on('get chat cache', function(log_cache) {
         console.log('get chat cache');
     
-        if ( log_cache )
+        if ( log_cache 
+                && ! messages.classList.contains('cache_used') )
         {
+            messages.classList.add('cache_used');
+            
             for (const msg of log_cache) {
                 var log_msg = document.createElement('li');
                 log_msg.classList.add(msg[0]);
