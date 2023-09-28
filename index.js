@@ -5,17 +5,17 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const ip = require('ip');
+// const ip = require('ip');
 const io = require("socket.io")(server, {
-    cors: {
-        origin: [
-            "http://localhost:3001",
-            "http://localhost:3002",
-            "http://"+ip.address()+":3001",
-            "http://"+ip.address()+":3002"
-        ], // Sokémon are on these ports
-        methods: ["GET", "POST"]
-    }
+    // cors: {
+    //     origin: [
+    //         "http://localhost:3001",
+    //         "http://localhost:3002",
+    //         "http://"+ip.address()+":3001",
+    //         "http://"+ip.address()+":3002"
+    //     ], // Sokémon are on these ports
+    //     methods: ["GET", "POST"]
+    // }
 });
 
 // Provide assets
@@ -56,13 +56,14 @@ io.on('connection', (socket) => {
     //////////////////////////////
     // User Management
 
-    var user, userPort;
+    // var user, userPort;
+    var user;
 
-    if ( socket.handshake.headers.referer )
-        userPort = socket.handshake.headers.referer.split(':')[2];
-    else
-        userPort = socket.handshake.headers.origin.split(':')[2];
-    userPort = userPort.slice(0, userPort.length - 1);
+    // if ( socket.handshake.headers.referer )
+    //     userPort = socket.handshake.headers.referer.split(':')[2];
+    // else
+    //     userPort = socket.handshake.headers.origin.split(':')[2];
+    // userPort = userPort.slice(0, userPort.length - 1);
 
     // Send the cached messages
     socket.on('request for chat cache', (userid) => {
@@ -81,7 +82,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
 
         if ( ! user )
-            console.log('battle arena disconnected');
+            console.log('⚔️  battle arena disconnected');
         else
             console.log('user disconnected', user);
     });
@@ -100,8 +101,10 @@ io.on('connection', (socket) => {
     // Battle Management
 
     // Flush battle if arena refreshed
-    if ( userPort == '9999')
+    if ( ! user )
+    // if ( userPort == '9999')
     {
+        console.log('⚔️  refresh the battle arena');
         battle.state = 'waiting';
         battle.players = [];
         battle.turn.pid = 0;
