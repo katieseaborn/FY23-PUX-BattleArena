@@ -299,7 +299,7 @@
             });
 
         // Cry!!
-        sokecry(contender.sokemon);
+        // sokecry(contender.sokemon);
     });
 
     // Contender is removed from battle
@@ -308,7 +308,7 @@
         // ip, port, name, sokemon
 
         // Cry!!
-        sokecry(contender.sokemon);
+        // sokecry(contender.sokemon);
 
         // Remove the sokemon, if it's there
         if ( document.getElementById('con-'+contender.name) )
@@ -481,7 +481,7 @@
             otherPlayer = battle.players[1];
 
         // Dodger laughs :D
-        sokecry(otherPlayer.sokemon, 'は は はー');
+        // sokecry(otherPlayer.sokemon, 'は は はー');
 
         // Show winner message
         // TODO: Change font color?
@@ -544,7 +544,7 @@
         });
 
         // Hit sound
-        sokecry(hit.otherPlayer.sokemon, 'いーたーいーいー');
+        // sokecry(hit.otherPlayer.sokemon, 'いーたーいーいー');
 
         // Animate getting hit
         battle_ef_atk.classList.toggle('on');
@@ -590,7 +590,7 @@
         }
 
         // Winner cry
-        sokecry(player.sokemon, 'やった！');
+        // sokecry(player.sokemon, 'やった！');
 
         // Show winner message
         battle_msg.textContent = 'Winner!';
@@ -631,10 +631,10 @@
         // sokecry(player.sokemon);
     });
 
-    // Just in case, I'll handle the voice
-    let sokecry = function (sokemon, speech='')
-    {
-        console.log(sokemon);
+    // // Just in case, I'll handle the voice
+    // let sokecry = function (sokemon, speech='')
+    // {
+    //     console.log(sokemon);
         // if ( speech == '' )
         //     speech = sokemon.voice.cry;
 
@@ -654,7 +654,7 @@
 
         // // Then speak
         // synth.speak( utterThis );
-    };
+    // };
 
     </script>
   </body>

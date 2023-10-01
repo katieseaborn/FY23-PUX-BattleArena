@@ -104,9 +104,9 @@ io.on('connection', (socket) => {
     // Listen for users disconnecting
     socket.on('disconnect', () => {
 
-        if ( ! user )
-            console.log('⚔️  battle arena disconnected');
-        else
+        // if ( ! user )
+        //     console.log('⚔️  battle arena disconnected');
+        // else
             console.log('user disconnected', user);
     });
 
@@ -123,22 +123,23 @@ io.on('connection', (socket) => {
     //////////////////////////////
     // Battle Management
 
-    // Flush battle if arena refreshed
-    if ( ! user )
-    // if ( userPort == '9999')
-    {
-        console.log('⚔️  refresh the battle arena');
-        battle.state = 'waiting';
-        battle.players = [];
-        battle.turn.pid = 0;
-        battle.turn.name = '';
+    // // Flush battle if arena refreshed
+    // console.log(user);
+    // if ( ! user )
+    // // if ( userPort == '9999')
+    // {
+    //     console.log('⚔️  refresh the battle arena');
+    //     battle.state = 'waiting';
+    //     battle.players = [];
+    //     battle.turn.pid = 0;
+    //     battle.turn.name = '';
 
-        // Send the cached messages
-        io.emit('get chat cache', cache.messages);
+    //     // Send the cached messages
+    //     io.emit('get chat cache');
 
-        console.log('battle:', battle);
-        console.log('chat cache:', cache);
-    }
+    //     console.log('battle:', battle);
+    //     // console.log('chat cache:', cache);
+    // }
 
     // Join battle
     socket.on('join battle', (contender) => {
@@ -213,6 +214,9 @@ io.on('connection', (socket) => {
 
         if ( removed )
         {
+            // Reset state
+            battle.state = 'waiting';
+
             // Remove from arena
             io.emit('remove contender', contender);
 

@@ -2,6 +2,10 @@
 
 Where sokémon come to battle.
 
+## Requirements
+
+- Google Chrome if local
+
 ## Install
 
 - `cd` to the directory in the command line, e.g., Terminal
@@ -10,7 +14,7 @@ Where sokémon come to battle.
 ## Usage
 
 - `cd` to the directory
-- `node index` or `nodemon index`
+- `node index` or `nodemon index` with optional `PORT=9999`
 - For the battle arena, go to http://localhost:9999 or https://battlearena.adaptable.app
   - If using Firefox, go to `about:config` and set `security.mixed_content.block_active_content` to `false`
   - If using music, make sure ttp://localhost:9999 is running locally and the songs are present in a `public/music` folder on the local machine
