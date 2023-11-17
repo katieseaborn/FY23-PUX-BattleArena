@@ -125,6 +125,8 @@ io.on('connection', (socket) => {
 
     // // Flush battle if arena refreshed
     // console.log(user);
+    // TODO: The battle arena kept refreshing and thus resetting
+    // TODO: Why?
     // if ( ! user )
     // // if ( userPort == '9999')
     // {
