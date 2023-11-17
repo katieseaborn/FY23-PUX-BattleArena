@@ -128,16 +128,16 @@ io.on('connection', (socket) => {
     // if ( userPort == '9999')
     {
         console.log('⚔️  refresh the battle arena');
-        battle.state = 'waiting';
-        battle.players = [];
-        battle.turn.pid = 0;
-        battle.turn.name = '';
+        // battle.state = 'waiting';
+        // battle.players = [];
+        // battle.turn.pid = 0;
+        // battle.turn.name = '';
 
         // Send the cached messages
         io.emit('get chat cache', cache.messages);
 
         console.log('battle:', battle);
-        console.log('chat cache:', cache);
+        // console.log('chat cache:', cache);
     }
 
     // Join battle
@@ -299,7 +299,11 @@ io.on('connection', (socket) => {
                     var otherCurrentHP = otherPlayer.sokemon.currentHP;
                     var otherHP = otherPlayer.sokemon.attributes.HP;
 
-                    var activeConAtk = activePlayer.sokemon.attributes.Attack;
+                    console.log(activePlayer.sokemon.attributes);
+                    if ( activePlayer.sokemon.attributes.Attack )
+                        var activeConAtk = activePlayer.sokemon.attributes.Attack;
+                    else
+                        var activeConAtk = otherPlayer.sokemon.attributes.Attack;
 
                     // TODO: Add random super effective
                     activeConAtk = activeConAtk / 5; // rough

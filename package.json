@@ -3,12 +3,12 @@
   "version": "2.0",
   "description": "Where sokémon come to battle.",
   "dependencies": {
-    "socket.io": "^4.5.3",
     "express": "^4.18.2",
-    "ip": "^1.1.8"
+    "ip": "^1.1.8",
+    "socket.io": "^4.5.3"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.22"
   },
   "scripts": {
     "start": "PORT=9999 node index.js"
